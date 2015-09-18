@@ -113,12 +113,13 @@ instance Pretty Image where
 imageDiff :: Image -> Image -> UIDouble
 imageDiff a b
   | pixelCount a == 0 && pixelCount b == 0 = 1
-  | otherwise                             = doubleToUI (avgDelta / 255)
+  | otherwise                             = d*d
   where xs = map fromIntegral . take l $ pixels a ++ repeat 0 :: [Double]
         ys = map fromIntegral . take l $ pixels b ++ repeat 0 :: [Double]
         l = max (pixelCount a) (pixelCount b)
         diff = sum . map abs $ zipWith (-) xs ys
         avgDelta = diff / fromIntegral l
+        d = doubleToUI (avgDelta / 255)
 
 makeImageSimilar :: Image -> UIDouble -> Image -> Image
 makeImageSimilar target amount a

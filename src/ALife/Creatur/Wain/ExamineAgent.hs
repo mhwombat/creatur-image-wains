@@ -70,7 +70,6 @@ examine a = do
   putStrLn $ "total # children weaned: "
     ++ show (view childrenWeanedLifetime a)
   putStrLn $ "litter size: " ++ show (length . view litter $ a)
-  putStrLn $ "size: " ++ show (view wainSize a)
   putStrLn $ "classifier SQ: " ++ show (schemaQuality . view classifier . view brain $ a)
   putStrLn $ "predictor SQ: " ++ show (schemaQuality . view predictor . view brain $ a)
   putStrLn $ "DSQ: " ++ show (decisionQuality . view brain $ a)

@@ -16,13 +16,14 @@ module ALife.Creatur.Wain.ImageWain
     ImageWain,
     describeClassifierModels,
     describePredictorModels,
-    adjustEnergy
+    adjustEnergy,
+    metabCost
   ) where
 
 import ALife.Creatur (agentId)
 import qualified ALife.Creatur.Wain as W
 import ALife.Creatur.Wain.Brain (classifier, predictor)
-import ALife.Creatur.Wain.GeneticSOM (modelMap)
+import ALife.Creatur.Wain.GeneticSOM (modelMap, numModels)
 import ALife.Creatur.Wain.Pretty (pretty)
 import ALife.Creatur.Wain.Image (Image, base64encode)
 import ALife.Creatur.Wain.ImageTweaker (ImageTweaker(..))
@@ -47,17 +48,20 @@ describePredictorModels w = map f ms
 
 adjustEnergy
   :: Simple Lens e (ImageWain a) -> Double
-    -> Simple Lens s Double -> Simple Lens e s
+    -> Simple Lens s Double -> String -> Simple Lens e s
       -> (String -> StateT e IO ()) -> StateT e IO ()
 adjustEnergy
-    wainSelector deltaE adultSelector summary report = do
-  w <- use wainSelector
-  let (w', adultDeltaE) = W.adjustEnergy deltaE w
+    wainLens deltaE statLens reason summary report = do
+  w <- use wainLens
+  let (w', used) = W.adjustEnergy deltaE w
   report $ "Adjusting energy of " ++ agentId w
-    ++ " by " ++ show deltaE
-    ++ ", adult's share is " ++ show adultDeltaE
-  report $ "Adult: " ++ show (view W.energy w)
-    ++ " " ++ show adultDeltaE
+    ++ " because " ++ reason ++ ": " ++ show (view W.energy w)
+    ++ " " ++ show deltaE
     ++ " -> " ++ show (view W.energy w')
-  (summary . adultSelector) += adultDeltaE
-  assign wainSelector w'
+    ++ " used=" ++ show used ++ " leftover=" ++ show (deltaE - used)
+  (summary . statLens) += used
+  assign wainLens w'
+
+metabCost :: Double -> Double -> Double -> ImageWain a -> Double
+metabCost bmc cpcm scale w = scale * (bmc + cpcm * fromIntegral n)
+  where n = numModels . view (W.brain . classifier) $ w

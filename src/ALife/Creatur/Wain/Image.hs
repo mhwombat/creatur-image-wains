@@ -110,16 +110,19 @@ instance Pretty Image where
   pretty (Image w h xs) = show w ++ "x" ++ show h ++ concatMap f xs
     where f x = ' ' : pretty x
 
+-- Using "sum of absolute differences" on the assumption that images
+-- have consistent lighting, color, viewing direction and size.
 imageDiff :: Image -> Image -> UIDouble
 imageDiff a b
   | pixelCount a == 0 && pixelCount b == 0 = 1
-  | otherwise                             = d*d
-  where xs = map fromIntegral . take l $ pixels a ++ repeat 0 :: [Double]
-        ys = map fromIntegral . take l $ pixels b ++ repeat 0 :: [Double]
-        l = max (pixelCount a) (pixelCount b)
-        diff = sum . map abs $ zipWith (-) xs ys
-        avgDelta = diff / fromIntegral l
-        d = doubleToUI (avgDelta / 255)
+  | otherwise                             = doubleToUI d
+  where l = max (pixelCount a) (pixelCount b)
+        absDiffs = map (fromIntegral . abs) $
+          zipWith (-) (pixels a) (pixels b) :: [Double]
+        -- missing pixels are maximally different
+        absDiffs' = take l $ absDiffs ++ repeat 255
+        sumAbsDiffs = sum absDiffs'
+        d = sumAbsDiffs / (255 * fromIntegral l)
 
 makeImageSimilar :: Image -> UIDouble -> Image -> Image
 makeImageSimilar target amount a

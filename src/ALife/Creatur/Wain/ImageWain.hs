@@ -27,7 +27,6 @@ import ALife.Creatur.Wain.Pretty (pretty)
 import ALife.Creatur.Wain.Image (Image, base64encode)
 import ALife.Creatur.Wain.ImageTweaker (ImageTweaker(..))
 import Control.Lens hiding (universe)
-import Control.Monad (when)
 import Control.Monad.State.Lazy (StateT)
 import qualified Data.Map.Strict as M
 
@@ -48,23 +47,17 @@ describePredictorModels w = map f ms
 
 adjustEnergy
   :: Simple Lens e (ImageWain a) -> Double
-    -> Simple Lens s Double -> Simple Lens s Double
-      -> Simple Lens e s -> (String -> StateT e IO ()) -> StateT e IO ()
+    -> Simple Lens s Double -> Simple Lens e s
+      -> (String -> StateT e IO ()) -> StateT e IO ()
 adjustEnergy
-    wainSelector deltaE adultSelector childSelector summary report = do
+    wainSelector deltaE adultSelector summary report = do
   w <- use wainSelector
-  let (w', adultDeltaE, childDeltaE) = W.adjustEnergy deltaE w
+  let (w', adultDeltaE) = W.adjustEnergy deltaE w
   report $ "Adjusting energy of " ++ agentId w
     ++ " by " ++ show deltaE
     ++ ", adult's share is " ++ show adultDeltaE
-    ++ ", child's share is " ++ show childDeltaE
   report $ "Adult: " ++ show (view W.energy w)
     ++ " " ++ show adultDeltaE
     ++ " -> " ++ show (view W.energy w')
-  report $ "Child: " ++ show (W.childEnergy w)
-    ++ " " ++ show childDeltaE
-    ++ " -> " ++ show (W.childEnergy w')
   (summary . adultSelector) += adultDeltaE
-  when (childDeltaE /= 0) $
-    (summary . childSelector) += childDeltaE
   assign wainSelector w'

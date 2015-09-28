@@ -114,11 +114,12 @@ instance Pretty Image where
 -- have consistent lighting, color, viewing direction and size.
 imageDiff :: Image -> Image -> UIDouble
 imageDiff a b
-  | pixelCount a == 0 && pixelCount b == 0 = 1
+  | pixelCount a == 0 && pixelCount b == 0 = 0
   | otherwise                             = doubleToUI d
   where l = max (pixelCount a) (pixelCount b)
-        absDiffs = map (fromIntegral . abs) $
-          zipWith (-) (pixels a) (pixels b) :: [Double]
+        absDiffs = map abs $ zipWith (-) as bs
+        as = map fromIntegral $ pixels a :: [Double]
+        bs = map fromIntegral $ pixels b :: [Double]
         -- missing pixels are maximally different
         absDiffs' = take l $ absDiffs ++ repeat 255
         sumAbsDiffs = sum absDiffs'

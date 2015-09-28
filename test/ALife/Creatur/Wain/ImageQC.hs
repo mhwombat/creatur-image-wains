@@ -77,9 +77,16 @@ instance Arbitrary Image where
 -- prop_imageToArray_round_trippable x = property $ x' == x
 --   where x' = arrayToImage . imageToArray $ x
 
+prop_imageDiff_can_be_0 :: Image -> Property
+prop_imageDiff_can_be_0 img = property $ imageDiff img img == 0
+
 prop_imageDiff_btw_0_and_1 :: Image -> Image -> Property
 prop_imageDiff_btw_0_and_1 i1 i2 = property $ 0 <= x && x <= 1
   where x = imageDiff i1 i2
+
+prop_imageDiff_symmetric :: Image -> Image -> Property
+prop_imageDiff_symmetric i1 i2 = property $
+  imageDiff i1 i2 == imageDiff i2 i1
 
 test :: Test
 test = testGroup "ALife.Creatur.Wain.ImageQC"
@@ -92,8 +99,12 @@ test = testGroup "ALife.Creatur.Wain.ImageQC"
       (prop_genetic_round_trippable (==) :: Image -> Property),
     testProperty "prop_diploid_identity - Image"
       (prop_diploid_identity (==) :: Image -> Property),
+    testProperty "prop_imageDiff_can_be_0"
+      prop_imageDiff_can_be_0,
     testProperty "prop_imageDiff_btw_0_and_1"
-      prop_imageDiff_btw_0_and_1
+      prop_imageDiff_btw_0_and_1,
+    testProperty "prop_imageDiff_symmetric"
+      prop_imageDiff_symmetric
     -- testProperty "prop_generator_never_fails - Image"
     --   (prop_generator_never_fails :: ValidImage -> Property)
   ]

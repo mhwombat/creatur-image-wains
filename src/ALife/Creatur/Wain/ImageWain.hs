@@ -17,7 +17,8 @@ module ALife.Creatur.Wain.ImageWain
     describeClassifierModels,
     describePredictorModels,
     adjustEnergy,
-    metabCost
+    metabCost,
+    packageVersion
   ) where
 
 import ALife.Creatur (agentId)
@@ -27,9 +28,17 @@ import ALife.Creatur.Wain.GeneticSOM (modelMap, numModels)
 import ALife.Creatur.Wain.Pretty (pretty)
 import ALife.Creatur.Wain.Image (Image, base64encode)
 import ALife.Creatur.Wain.ImageTweaker (ImageTweaker(..))
+import ALife.Creatur.Wain.UnitInterval (uiToDouble)
 import Control.Lens hiding (universe)
 import Control.Monad.State.Lazy (StateT)
 import qualified Data.Map.Strict as M
+import Data.Version (showVersion)
+import Paths_creatur_image_wains (version)
+import Text.Printf (printf)
+
+-- | Returns the current version number of this library.
+packageVersion :: String
+packageVersion = "creatur-image-wains-" ++ showVersion version
 
 type ImageWain a = W.Wain Image ImageTweaker a
 
@@ -55,10 +64,12 @@ adjustEnergy
   w <- use wainLens
   let (w', used) = W.adjustEnergy deltaE w
   report $ "Adjusting energy of " ++ agentId w
-    ++ " because " ++ reason ++ ": " ++ show (view W.energy w)
-    ++ " " ++ show deltaE
-    ++ " -> " ++ show (view W.energy w')
-    ++ " used=" ++ show used ++ " leftover=" ++ show (deltaE - used)
+    ++ " because " ++ reason ++ ": "
+    ++ printf "%.3f" (uiToDouble . W._energy $ w)
+    ++ " + " ++ printf "%.3f" deltaE
+    ++ " -> " ++ printf "%.3f" (uiToDouble . W._energy $ w')
+    ++ " used=" ++ printf "%.3f" used ++ " leftover="
+    ++ printf "%.3f" (deltaE - used)
   (summary . statLens) += used
   assign wainLens w'
 

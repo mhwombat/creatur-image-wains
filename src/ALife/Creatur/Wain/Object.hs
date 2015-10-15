@@ -19,11 +19,14 @@ module ALife.Creatur.Wain.Object
     objectId,
     objectNum,
     objectAppearance,
+    objectEnergy,
+    objectChildEnergy,
     addIfWain,
     objectToWain
   ) where
 
 import ALife.Creatur (agentId)
+import ALife.Creatur.Wain.UnitInterval (UIDouble)
 import qualified ALife.Creatur.Wain as W
 import ALife.Creatur.Wain.Image (Image)
 import ALife.Creatur.Wain.ImageTweaker (ImageTweaker(..))
@@ -48,13 +51,13 @@ objectAppearance :: Object a -> Image
 objectAppearance (IObject img _) = img
 objectAppearance (AObject a) = view W.appearance a
 
--- objectEnergy :: Object a -> UIDouble
--- objectEnergy (IObject _ _) = 0
--- objectEnergy (AObject a) = view W.energy a
+objectEnergy :: Object a -> UIDouble
+objectEnergy (IObject _ _) = 0
+objectEnergy (AObject a) = view W.energy a
 
--- objectChildEnergy :: Object a -> Double
--- objectChildEnergy (IObject _ _) = 0
--- objectChildEnergy (AObject a) = W.childEnergy a
+objectChildEnergy :: Object a -> Double
+objectChildEnergy (IObject _ _) = 0
+objectChildEnergy (AObject a) = W.childEnergy a
 
 addIfWain
   :: Object a -> [W.Wain Image ImageTweaker a]

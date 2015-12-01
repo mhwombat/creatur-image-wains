@@ -77,12 +77,12 @@ examine a = do
   putStrLn $ "DSQ: " ++ show (decisionQuality . _brain $ a)
   putStrLn $ "Number of classifier models: " ++ show (numModels . _classifier . _brain $ a)
   putStrLn $ "Max classifier size: " ++ show (maxSize . _classifier . _brain $ a)
-  putStrLn $ "Classifier learning function " ++ show (_exponentialParams . _classifier . _brain $ a)
+  putStrLn $ "Classifier learning function " ++ show (_learningParams . _classifier . _brain $ a)
   putStrLn $ "Classifier counts: " ++ show (counterMap . _classifier . _brain $ a)
   mapM_ putStrLn $ describeClassifierModels a
   putStrLn $ "Number of predictor models: " ++ show (numModels . _predictor . _brain $ a)
   putStrLn $ "Max predictor size: " ++ show (maxSize . _classifier . _brain $ a)
-  putStrLn $ "Predictor learning function " ++ show (_exponentialParams . _predictor . _brain $ a)
+  putStrLn $ "Predictor learning function " ++ show (_learningParams . _predictor . _brain $ a)
   putStrLn $ "Predictor counts: " ++ show (counterMap . _predictor . _brain $ a)
   let hw = _happinessWeights . _brain $ a
   putStrLn $ "energy happiness weight: " ++ show (hw `weightAt` 0)

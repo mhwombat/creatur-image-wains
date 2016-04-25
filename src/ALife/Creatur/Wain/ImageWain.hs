@@ -17,8 +17,8 @@ module ALife.Creatur.Wain.ImageWain
     describeClassifierModels,
     describePredictorModels,
     adjustEnergy,
-    metabCost
-    -- packageVersion
+    metabCost,
+    packageVersion
   ) where
 
 import ALife.Creatur (agentId)
@@ -32,13 +32,13 @@ import ALife.Creatur.Wain.UnitInterval (uiToDouble)
 import Control.Lens hiding (universe)
 import Control.Monad.State.Lazy (StateT)
 import qualified Data.Map.Strict as M
--- import Data.Version (showVersion)
--- import Paths_creatur_image_wains (version)
+import Data.Version (showVersion)
+import Paths_creatur_image_wains (version)
 import Text.Printf (printf)
 
--- -- | Returns the current version number of this library.
--- packageVersion :: String
--- packageVersion = "creatur-image-wains-" ++ showVersion version
+-- | Returns the current version number of this library.
+packageVersion :: String
+packageVersion = "creatur-image-wains-" ++ showVersion version
 
 type ImageWain a = W.Wain Image ImageTweaker a
 

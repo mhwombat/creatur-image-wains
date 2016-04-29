@@ -1,5 +1,5 @@
 name:                creatur-image-wains
-version:             1.1.6
+version:             1.1.7
 synopsis:            Simple image library for use with creatur-wains.
 description:         Simple image library for use with creatur-wains.
                      Images can be genetically encoded and decoded,
@@ -31,7 +31,7 @@ library
                        cereal ==0.5.*,
                        containers ==0.5.*,
                        creatur ==5.9.*,
-                       creatur-wains ==8.3.*,
+                       creatur-wains ==8.4.*,
                        directory ==1.2.*,
                        filepath ==1.4.*,
                        JuicyPixels ==3.2.*,
@@ -57,7 +57,7 @@ Test-suite wain-tests
                        bytestring ==0.10.*,
                        cereal ==0.5.*,
                        creatur ==5.9.*,
-                       creatur-wains ==8.3.*,
+                       creatur-wains ==8.4.*,
                        creatur-wains-test-utils ==1.*,
                        JuicyPixels ==3.2.*,
                        MonadRandom ==0.4.*,

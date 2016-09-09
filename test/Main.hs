@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------
 -- |
 -- Module      :  Main
--- Copyright   :  (c) Amy de Buitléir 2012-2015
+-- Copyright   :  (c) Amy de Buitléir 2012-2016
 -- License     :  BSD-style
 -- Maintainer  :  amy@nualeargais.ie
 -- Stability   :  experimental
@@ -12,7 +12,7 @@
 ------------------------------------------------------------------------
 module Main where
 
-import ALife.Creatur.Wain.ImageQC (test)
+import ALife.Creatur.Wain.Image.PatternQC (test)
 
 import Test.Framework as TF (defaultMain, Test)
 
@@ -20,7 +20,7 @@ tests :: [TF.Test]
 tests = 
   [
     -- In increasing order of complexity
-    ALife.Creatur.Wain.ImageQC.test
+    ALife.Creatur.Wain.Image.PatternQC.test
   ]
 
 main :: IO ()

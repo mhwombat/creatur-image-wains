@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------
 -- |
--- Module      :  ALife.Creatur.Wain.ImageDB
--- Copyright   :  (c) Amy de Buitléir 2012-2015
+-- Module      :  ALife.Creatur.Wain.Image.PatternDB
+-- Copyright   :  (c) Amy de Buitléir 2012-2016
 -- License     :  BSD-style
 -- Maintainer  :  amy@nualeargais.ie
 -- Stability   :  experimental
@@ -11,14 +11,14 @@
 -- separate file. The name of the file is the record's key.
 --
 ------------------------------------------------------------------------
-module ALife.Creatur.Wain.ImageDB
+module ALife.Creatur.Wain.Image.PatternDB
   (
-    ImageDB,
-    mkImageDB,
-    anyImage
+    PatternDB,
+    mkPatternDB,
+    anyPattern
   ) where
 
-import ALife.Creatur.Wain.Image (Image, readImage)
+import ALife.Creatur.Wain.Image.Pattern (Pattern, readImage)
 import Control.Monad (unless)
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.State (StateT, get, gets, put)
@@ -27,23 +27,23 @@ import System.Random (randomRIO)
 
 -- | A simple database where each record is stored in a separate file, 
 --   and the name of the file is the record's key.
-data ImageDB = ImageDB
+data PatternDB = PatternDB
   {
     initialised :: Bool,
     mainDir :: FilePath,
     images :: [FilePath],
-    numImages :: Int
+    numPatterns :: Int
   } deriving (Eq)
 
-instance Show ImageDB where
+instance Show PatternDB where
   show = mainDir
 
--- | @'mkImageDB' d@ (re)creates the ImageDB in the
+-- | @'mkPatternDB' d@ (re)creates the PatternDB in the
 --   directory @d@.
-mkImageDB :: FilePath -> ImageDB
-mkImageDB d = ImageDB False d undefined undefined
+mkPatternDB :: FilePath -> PatternDB
+mkPatternDB d = PatternDB False d undefined undefined
 
-initIfNeeded :: StateT ImageDB IO ()
+initIfNeeded :: StateT PatternDB IO ()
 initIfNeeded = do
   isInitialised <- gets initialised
   unless isInitialised $ do
@@ -51,22 +51,22 @@ initIfNeeded = do
     db' <- liftIO $ initialise db
     put db'
 
-initialise :: ImageDB -> IO ImageDB
+initialise :: PatternDB -> IO PatternDB
 initialise db = do
   files <- liftIO . getDirectoryContents . mainDir $ db
-  let imageFiles = filter isImageFileName files
+  let imageFiles = filter isPatternFileName files
   return db { initialised=True, images=imageFiles,
-             numImages=length imageFiles }
+             numPatterns=length imageFiles }
 
-isImageFileName :: String -> Bool
-isImageFileName s =
+isPatternFileName :: String -> Bool
+isPatternFileName s =
   s `notElem` [ "archive", ".", ".." ]
 
-anyImage :: StateT ImageDB IO (Image, String)
-anyImage = do
+anyPattern :: StateT PatternDB IO (Pattern, String)
+anyPattern = do
   initIfNeeded
   db <- get
-  k <- liftIO $ randomRIO (0,numImages db - 1)
+  k <- liftIO $ randomRIO (0,numPatterns db - 1)
   let filename = images db !! k
   img <- liftIO . readImage $ mainDir db ++ '/':filename
   return (img, filename)

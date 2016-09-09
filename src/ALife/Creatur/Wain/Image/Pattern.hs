@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------
 -- |
--- Module      :  ALife.Creatur.Wain.Image
--- Copyright   :  (c) Amy de Buitléir 2012-2015
+-- Module      :  ALife.Creatur.Wain.Image.Pattern
+-- Copyright   :  (c) Amy de Buitléir 2012-2016
 -- License     :  BSD-style
 -- Maintainer  :  amy@nualeargais.ie
 -- Stability   :  experimental
@@ -12,9 +12,9 @@
 ------------------------------------------------------------------------
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE TypeFamilies #-}
-module ALife.Creatur.Wain.Image
+module ALife.Creatur.Wain.Image.Pattern
   (
-    Image(..),
+    Pattern,
     mkImage,
     pixelCount,
     pixelAt,
@@ -56,19 +56,19 @@ import Data.Vector.Storable (Vector, toList, fromList)
 import Data.Word (Word8)
 import GHC.Generics (Generic)
 
-data Image = Image { iWidth :: Int, iHeight :: Int, pixels :: [Word8] }
+data Pattern = Image { iWidth :: Int, iHeight :: Int, pixels :: [Word8] }
   deriving (Eq, Generic, Show)
 
-pixelCount :: Image -> Int
+pixelCount :: Pattern -> Int
 pixelCount img = iWidth img * iHeight img
 
-mkImage :: Int -> Int -> [Word8] -> Image
+mkImage :: Int -> Int -> [Word8] -> Pattern
 mkImage w h ps = Image w h ps'
   where ps' = take (w*h) (ps ++ repeat 0)
 
-instance Serialize Image
+instance Serialize Pattern
 
-instance Genetic Image where
+instance Genetic Pattern where
   put img = do
     put . forceIntToWord8 . iWidth $ img
     put . forceIntToWord8 . iHeight $ img
@@ -81,7 +81,7 @@ instance Genetic Image where
 getPixels
   :: Either [String] Word8
      -> Either [String] Word8
-     -> Reader (Either [String] Image)
+     -> Reader (Either [String] Pattern)
 getPixels (Right w) (Right h) = do
   let w' = word8ToInt w
   let h' = word8ToInt h
@@ -91,10 +91,10 @@ getPixels (Left s) (Right _) = return $ Left s
 getPixels (Right _) (Left s) = return $ Left s
 getPixels (Left s) (Left t) = return $ Left (s ++ t)
 
-pixelAt :: Image -> Int -> Int -> Word8
+pixelAt :: Pattern -> Int -> Int -> Word8
 pixelAt (Image w _ ps) r c = ps !! (r*w + c)
 
-pixelArray :: Image -> [[Word8]]
+pixelArray :: Pattern -> [[Word8]]
 pixelArray (Image w _ ps) = chunksOf w ps
 
 -- forceEitherWord8List :: Either [String] [Word8] -> [Word8]
@@ -103,16 +103,16 @@ pixelArray (Image w _ ps) = chunksOf w ps
 --     Left _ -> []
 --     Right ws -> ws
 
--- instance Show Image where
+-- instance Show Pattern where
 --   show (Image w h _) = "<" ++ show w ++ "x" ++ show h ++ " pixels>"
 
-instance Pretty Image where
+instance Pretty Pattern where
   pretty (Image w h xs) = show w ++ "x" ++ show h ++ concatMap f xs
     where f x = ' ' : pretty x
 
 -- Using "sum of absolute differences" on the assumption that images
 -- have consistent lighting, color, viewing direction and size.
-imageDiff :: Image -> Image -> UIDouble
+imageDiff :: Pattern -> Pattern -> UIDouble
 imageDiff a b
   | pixelCount a == 0 && pixelCount b == 0 = 0
   | otherwise                             = doubleToUI d
@@ -125,11 +125,11 @@ imageDiff a b
         sumAbsDiffs = sum absDiffs'
         d = sumAbsDiffs / (255 * fromIntegral l)
 
-makeImageSimilar :: Image -> UIDouble -> Image -> Image
+makeImageSimilar :: Pattern -> UIDouble -> Pattern -> Pattern
 makeImageSimilar target amount a
     = a { pixels=adjust (pixels target) (uiToDouble amount) (pixels a) }
 
-instance Diploid Image where
+instance Diploid Pattern where
   express a b = mkImage w h ps
     where w = min (iWidth a) (iWidth b)
           h = min (iHeight a) (iHeight b)
@@ -137,18 +137,18 @@ instance Diploid Image where
 
 -- Used for generating the initial brain models in the initial
 -- population.
-randomImage :: RandomGen r => Int -> Int -> Rand r Image
+randomImage :: RandomGen r => Int -> Int -> Rand r Pattern
 randomImage w h = fmap (mkImage w h . take (w*h)) getRandoms
 
 -- Used for generating the initial brain models in the initial
 -- population.
-randomImageR :: RandomGen r => Int -> Int -> (Word8, Word8) -> Rand r Image
+randomImageR :: RandomGen r => Int -> Int -> (Word8, Word8) -> Rand r Pattern
 randomImageR w h range
   = (mkImage w h . take (w * h)) <$> getRandomRs range
 
 -- Used for generating the initial brain models in the initial
 -- population.
-blankImage :: Int -> Int -> Image
+blankImage :: Int -> Int -> Pattern
 blankImage w h = Image w h $ replicate (w*h) 0
 
 indices :: Int -> Int -> [(Int, Int)]
@@ -159,13 +159,13 @@ indices w h = [(i,j) | i <- [0..h-1], j <- [0..w-1]]
 -- indices w h = [(i,j) | i <- [0..h-1], j <- [0..w-1]]
 --   -- row, column, colour channel
 
-bigX :: Int -> Int -> Image
+bigX :: Int -> Int -> Pattern
 bigX w h = Image w h . map f $ indices w h
   where f (i,j) = if abs (i - j) < 2 || abs (w - 1 - i - j) < 2
                     then 255
                     else 0
 
-readImage :: FilePath -> IO Image
+readImage :: FilePath -> IO Pattern
 readImage filePath = do
   result <- P.readImage filePath
   case result of
@@ -176,7 +176,7 @@ readImage filePath = do
     Right _ -> error $ "Wrong image format: " ++ filePath
     Left msg -> error $ "Unable to read " ++ filePath ++ ": " ++ msg
   
-writeImage :: FilePath -> Image -> IO ()
+writeImage :: FilePath -> Pattern -> IO ()
 writeImage filePath img = do
   let ps = fromList $ pixels img :: Vector (P.PixelBaseComponent P.Pixel8)
   let img' = P.Image (iWidth img) (iHeight img) ps :: P.Image P.Pixel8
@@ -184,22 +184,22 @@ writeImage filePath img = do
   P.writePng filePath img'
   -- I.runIL $ I.writeImage filePath $ imageToArray img
 
-toPNG :: Image -> P.Image P.Pixel8
+toPNG :: Pattern -> P.Image P.Pixel8
 toPNG (Image w h ps) = P.Image w h (fromList ps)
 
-base64encode :: Image -> String
+base64encode :: Pattern -> String
 base64encode
   = UTF8.toString . B64.encode . B.concat . BL.toChunks . P.encodePng
       . toPNG
 
--- imageToArray :: Image -> I.Image
+-- imageToArray :: Pattern -> I.Image
 -- imageToArray img = I.Grey arr
 --   where w = iWidth img
 --         h = iHeight img
 --         xs = pixels img
 --         arr = fromList ((Z :. h) :. w) xs
 
--- arrayToImage :: I.Image -> Image
+-- arrayToImage :: I.Image -> Pattern
 -- arrayToImage (I.Grey arr) = Image w h $ toList arr
 --   where (w:h:_) = listOfShape . extent $ arr
 -- arrayToImage _ = error "Unsupported image type"
@@ -264,22 +264,22 @@ zipWithCopyRight _ [] ys = ys
 --     where dims = map fromIntegral . listOfShape . extent $ arr :: [Word8]
 --   get = getArray 2
 
--- instance Show Image where
+-- instance Show Pattern where
 --   show (RGBA a) = "RGB " ++ show (toList a)
 --   show (RGB a)  = "RGB " ++ show (toList a)
 --   show (BGRA a) = "RGB " ++ show (toList a)
 --   show (BGR a)  = "RGB " ++ show (toList a)
 --   show (Grey a) = "RGB " ++ show (toList a)
     
--- pixelCount :: Image -> Int
+-- pixelCount :: Pattern -> Int
 -- pixelCount (RGBA a) = length . toList $ a
 -- pixelCount (RGB a)  = length . toList $ a
 -- pixelCount (BGRA a) = length . toList $ a
 -- pixelCount (BGR a)  = length . toList $ a
 -- pixelCount (Grey a) = length . toList $ a
 
--- instance Pattern Image where
---   type Metric Image = Double
+-- instance Pattern Pattern where
+--   type Metric Pattern = Double
 --   difference (Image a) (Image b) = imageDistance a b
 --   -- difference (RGBA a) (RGBA b) = imageDistance a b
 --   -- difference (RGB a) (RGB b) = imageDistance a b
@@ -349,7 +349,7 @@ zipWithCopyRight _ [] ys = ys
 --      Array r1 sh Word8 -> Array r2 sh Word8 -> Array r1 sh Word8
 -- imgExpress a b = runIdentity . computeP $ R.zipWith min a b
 
--- instance Diploid Image where
+-- instance Diploid Pattern where
 --   express (Image a) (Image b) = Image $ zipWith min a b
   -- express (RGBA a) (RGBA b) = RGBA $ imgExpress a b
   -- express (RGB a) (RGB b) = RGB $ imgExpress a b

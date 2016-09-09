@@ -1,5 +1,5 @@
 name:                creatur-image-wains
-version:             1.1.7
+version:             1.1.8
 synopsis:            Simple image library for use with creatur-wains.
 description:         Simple image library for use with creatur-wains.
                      Images can be genetically encoded and decoded,
@@ -10,19 +10,19 @@ license:             BSD3
 license-file:        LICENSE
 author:              Amy de Buitléir
 maintainer:          amy@nualeargais.ie
-copyright:           (c) Amy de Buitléir 2012-2015
+copyright:           (c) Amy de Buitléir 2012-2016
 category:            Data
 build-type:          Simple
 extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     ALife.Creatur.Wain.ExamineAgent,
-                       ALife.Creatur.Wain.Image,
-                       ALife.Creatur.Wain.ImageDB,
-                       ALife.Creatur.Wain.ImageTweaker,
-                       ALife.Creatur.Wain.ImageWain,
-                       ALife.Creatur.Wain.Object
+  exposed-modules:     ALife.Creatur.Wain.Image.ExamineAgent,
+                       ALife.Creatur.Wain.Image.Pattern,
+                       ALife.Creatur.Wain.Image.PatternDB,
+                       ALife.Creatur.Wain.Image.Tweaker,
+                       ALife.Creatur.Wain.Image.Wain,
+                       ALife.Creatur.Wain.Image.Object
   ghc-options:         -Wall -fno-warn-orphans
   other-modules:       Paths_creatur_image_wains
   build-depends:       base >=4.8 && <4.9,
@@ -31,7 +31,7 @@ library
                        cereal ==0.5.*,
                        containers ==0.5.*,
                        creatur ==5.9.*,
-                       creatur-wains ==8.4.*,
+                       creatur-wains ==8.6.*,
                        directory ==1.2.*,
                        filepath ==1.4.*,
                        JuicyPixels ==3.2.*,
@@ -56,11 +56,14 @@ Test-suite wain-tests
                        base64-bytestring ==1.0.*,
                        bytestring ==0.10.*,
                        cereal ==0.5.*,
+                       containers ==0.5.*,
                        creatur ==5.9.*,
-                       creatur-wains ==8.4.*,
+                       creatur-wains ==8.6.*,
                        creatur-wains-test-utils ==1.*,
                        JuicyPixels ==3.2.*,
+                       lens ==4.13.*,
                        MonadRandom ==0.4.*,
+                       mtl ==2.2.*,
                        QuickCheck ==2.8.*,
                        split ==0.2.*,
                        test-framework ==0.8.*,
